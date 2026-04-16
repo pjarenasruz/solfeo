@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bombardino Sib Pro</title>
+    <title>Bombardino Sib Pro - Entrenamiento</title>
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
     <style>
         :root {
@@ -21,7 +21,32 @@
         .container {
             max-width: 600px; margin: 0 auto; background: white; 
             border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
         }
+        
+        /* Botón de Ayuda */
+        .help-btn {
+            position: absolute; top: 15px; right: 15px;
+            width: 30px; height: 30px; border-radius: 50%;
+            background: var(--primary); color: white; border: none;
+            font-weight: bold; cursor: pointer; z-index: 100;
+        }
+
+        /* Modal de Ayuda */
+        .modal {
+            display: none; position: fixed; z-index: 200;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white; margin: 10% auto; padding: 20px;
+            border-radius: 15px; width: 85%; max-width: 500px;
+            text-align: left; line-height: 1.5; max-height: 80vh; overflow-y: auto;
+        }
+        .close-modal {
+            float: right; font-size: 28px; font-weight: bold; cursor: pointer;
+        }
+
         .selector-label {
             font-size: 0.75rem; font-weight: bold; color: var(--primary);
             text-align: left; margin: 5px 0 2px 5px; text-transform: uppercase; letter-spacing: 1px;
@@ -38,12 +63,11 @@
             background: #dfe6e9; border: none; font-weight: bold; font-size: 0.8rem;
             cursor: pointer; transition: background 0.2s;
         }
-        .pill-btn.active, .pill-btn:active { background: var(--accent); color: white; }
+        .pill-btn.active { background: var(--accent); color: white; }
         
         .transpose-wrapper {
             display: flex; align-items: center; justify-content: flex-start;
             gap: 10px; background: transparent; padding: 5px 5px 15px 5px;
-            margin-bottom: 5px;
         }
         .transpose-btn {
             width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center;
@@ -52,31 +76,40 @@
         #trans-label { font-weight: bold; font-size: 0.95rem; color: var(--primary); min-width: 65px; text-align: center; }
 
         #feedback { 
-            min-height: 30px; 
-            margin-bottom: -10px; 
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            transition: opacity 0.2s;
-            z-index: 10;
-            position: relative;
+            min-height: 30px; margin-bottom: -10px; font-size: 1.2rem; 
+            font-weight: bold; transition: opacity 0.2s; position: relative;
         }
 
         #canvas-container { width: 100%; display: flex; justify-content: center; min-height: 220px; }
-        
         .button-row { display: flex; justify-content: space-between; gap: 4px; margin-top: 10px; }
         button.note-btn { 
             flex: 1; padding: 15px 0; font-size: 0.9rem; font-weight: bold; 
             background: var(--primary); color: white; border: none; border-radius: 8px;
-            min-width: 0;
         }
-        button.note-btn:active { background: var(--accent); }
-        
         .info-bar { display: flex; justify-content: flex-start; font-size: 0.9rem; color: #636e72; padding: 0 5px; }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <button class="help-btn" onclick="toggleModal(true)">?</button>
+
+        <div id="helpModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="toggleModal(false)">&times;</span>
+                <h2>Manual de Usuario</h2>
+                <p>Esta es una aplicación diseñada para el <strong>entrenamiento de lenguaje musical</strong> y lectura de notas.</p>
+                <hr>
+                <ul>
+                    <li><strong>Clave:</strong> Selecciona Sol, Fa o Do. Al cambiar de clave, volverás automáticamente al Nivel 1.</li>
+                    <li><strong>Dificultad:</strong> Los niveles aumentan el rango de notas (distancia desde la nota central).</li>
+                    <li><strong>Transportar:</strong> Ajusta el tono si tocas un instrumento transpositor (ej. Bombardino en Sib = +1 Tono). Por defecto es 0.</li>
+                    <li><strong>Progresión:</strong> Si logras <strong>20 aciertos seguidos</strong>, ¡subirás de nivel automáticamente!</li>
+                    <li><strong>Racha:</strong> Si fallas una nota, la racha vuelve a 0.</li>
+                </ul>
+            </div>
+        </div>
+
         <div class="selector-label">Clave</div>
         <div class="horizontal-selector" id="clef-picker">
             <button class="pill-btn active" onclick="setClef('treble', this)">Clave de Sol</button>
@@ -99,7 +132,6 @@
         </div>
         
         <div id="feedback"></div>
-        
         <div id="canvas-container"><div id="boo"></div></div>
 
         <div class="button-row">
@@ -126,11 +158,7 @@
             "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5", "c/6"
         ];
 
-        const clefCenters = {
-            "treble": 25, 
-            "bass": 17,   
-            "alto": 21    
-        };
+        const clefCenters = { "treble": 25, "bass": 17, "alto": 21 };
 
         const levelSpans = [
             { id: 1, span: 1 }, { id: 2, span: 2 }, { id: 3, span: 3 },
@@ -139,16 +167,17 @@
             { id: 10, span: 18 }
         ];
 
-        let currentClef = "treble";
-        let currentLevelIdx = 0, currentNoteKey = "", currentCorrectAnswer = "";
+        let currentClef = "treble", currentLevelIdx = 0, currentNoteKey = "", currentCorrectAnswer = "";
         let transposeSemiTones = 0, hits = 0, feedbackTimeout = null;
+
+        function toggleModal(show) {
+            document.getElementById('helpModal').style.display = show ? 'block' : 'none';
+        }
 
         function setClef(clef, btn) {
             currentClef = clef;
             document.querySelectorAll('#clef-picker .pill-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
-            // Forzar volver al Nivel 1 y resetear puntuación
             setLevel(0, true); 
         }
 
@@ -180,7 +209,7 @@
                 btn.className = `pill-btn ${index === 0 ? 'active' : ''}`;
                 btn.innerText = `Lvl ${lvl.id}`;
                 btn.id = `btn-lvl-${index}`;
-                btn.onclick = (e) => setLevel(index, true);
+                btn.onclick = () => setLevel(index, true);
                 container.appendChild(btn);
             });
         }
@@ -188,14 +217,9 @@
         function setLevel(index, shouldResetScore = false) {
             currentLevelIdx = index;
             if (shouldResetScore) resetScore();
-            
-            document.querySelectorAll('#lvl-picker .pill-btn').forEach((b, i) => {
-                b.classList.toggle('active', i === index);
-            });
-
+            document.querySelectorAll('#lvl-picker .pill-btn').forEach((b, i) => b.classList.toggle('active', i === index));
             const activeBtn = document.getElementById(`btn-lvl-${index}`);
             if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-
             generateNote();
         }
 
@@ -243,7 +267,6 @@
             if (name === currentCorrectAnswer) {
                 hits++;
                 document.getElementById("score").innerText = `Racha: ${hits}`;
-                
                 if (hits >= 20 && currentLevelIdx < levelSpans.length - 1) {
                     feedbackDiv.style.color = "var(--accent)";
                     feedbackDiv.innerText = "¡SUBES DE NIVEL!";
@@ -254,7 +277,6 @@
                     feedbackDiv.innerText = "¡Correcto!";
                     generateNote();
                 }
-                
                 feedbackDiv.style.opacity = "1";
                 feedbackTimeout = setTimeout(() => { feedbackDiv.style.opacity = "0"; }, 800);
             } else {
@@ -265,9 +287,15 @@
             }
         }
 
+        window.onclick = function(event) {
+            let modal = document.getElementById('helpModal');
+            if (event.target == modal) modal.style.display = "none";
+        }
+
         initLevels();
         updateTransposeLabel();
         setLevel(0);
     </script>
 </body>
 </html>
+```
