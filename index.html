@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Solfeo</title>
+    <title>Bombardino Sib Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
     <style>
         :root {
@@ -22,71 +22,65 @@
             max-width: 600px; margin: 0 auto; background: white; 
             border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             position: relative;
+            margin-top: 15px;
         }
         
-        /* Botón de Ayuda */
+        /* Ayuda Flotante */
         .help-btn {
-            position: absolute; top: 15px; right: 15px;
-            width: 30px; height: 30px; border-radius: 50%;
-            background: var(--primary); color: white; border: none;
+            position: absolute; top: -12px; right: 10px;
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--primary); color: white; border: 2px solid white;
             font-weight: bold; cursor: pointer; z-index: 100;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
         }
 
-        /* Modal de Ayuda */
         .modal {
             display: none; position: fixed; z-index: 200;
             left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.6); backdrop-filter: blur(2px);
         }
         .modal-content {
-            background-color: white; margin: 10% auto; padding: 20px;
-            border-radius: 15px; width: 85%; max-width: 500px;
-            text-align: left; line-height: 1.5; max-height: 80vh; overflow-y: auto;
-        }
-        .close-modal {
-            float: right; font-size: 28px; font-weight: bold; cursor: pointer;
+            background-color: white; margin: 15% auto; padding: 25px;
+            border-radius: 20px; width: 85%; max-width: 400px;
+            text-align: left; position: relative;
         }
 
         .selector-label {
-            font-size: 0.75rem; font-weight: bold; color: var(--primary);
-            text-align: left; margin: 5px 0 2px 5px; text-transform: uppercase; letter-spacing: 1px;
+            font-size: 0.65rem; font-weight: 800; color: #95a5a6;
+            text-align: left; margin: 10px 0 5px 5px; text-transform: uppercase; letter-spacing: 1px;
         }
+        
         .horizontal-selector {
-            display: flex; overflow-x: auto; gap: 8px; padding: 5px 5px 10px 5px;
-            margin-bottom: 5px; border-bottom: 1px solid #eee;
-            scrollbar-width: none; -webkit-overflow-scrolling: touch;
+            display: flex; overflow-x: auto; gap: 10px; padding: 5px 2px 10px 2px;
+            scrollbar-width: none;
         }
         .horizontal-selector::-webkit-scrollbar { display: none; }
         
+        /* Botones de Clave Compactos */
+        .clef-btn {
+            width: 45px; height: 45px; border-radius: 12px;
+            background: #f0f3f6; border: none; font-size: 1.8rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; color: var(--primary);
+        }
+        .clef-btn.active { background: var(--accent); color: white; transform: scale(1.05); }
+
         .pill-btn {
-            flex: 0 0 auto; padding: 8px 14px; border-radius: 20px;
-            background: #dfe6e9; border: none; font-weight: bold; font-size: 0.8rem;
-            cursor: pointer; transition: background 0.2s;
+            flex: 0 0 auto; padding: 8px 15px; border-radius: 15px;
+            background: #f0f3f6; border: none; font-weight: bold; font-size: 0.8rem;
+            cursor: pointer;
         }
         .pill-btn.active { background: var(--accent); color: white; }
         
-        .transpose-wrapper {
-            display: flex; align-items: center; justify-content: flex-start;
-            gap: 10px; background: transparent; padding: 5px 5px 15px 5px;
-        }
-        .transpose-btn {
-            width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; border-radius: 50%;
-        }
-        #trans-label { font-weight: bold; font-size: 0.95rem; color: var(--primary); min-width: 65px; text-align: center; }
+        .transpose-wrapper { display: flex; align-items: center; gap: 15px; padding: 5px; }
+        .trans-control { width: 35px; height: 35px; border-radius: 50%; border: none; background: #eee; font-size: 1.2rem; font-weight: bold; }
 
-        #feedback { 
-            min-height: 30px; margin-bottom: -10px; font-size: 1.2rem; 
-            font-weight: bold; transition: opacity 0.2s; position: relative;
-        }
-
-        #canvas-container { width: 100%; display: flex; justify-content: center; min-height: 220px; }
-        .button-row { display: flex; justify-content: space-between; gap: 4px; margin-top: 10px; }
-        button.note-btn { 
-            flex: 1; padding: 15px 0; font-size: 0.9rem; font-weight: bold; 
-            background: var(--primary); color: white; border: none; border-radius: 8px;
-        }
-        .info-bar { display: flex; justify-content: flex-start; font-size: 0.9rem; color: #636e72; padding: 0 5px; }
+        #feedback { min-height: 30px; margin-bottom: -15px; font-size: 1.1rem; font-weight: bold; transition: opacity 0.2s; }
+        #canvas-container { width: 100%; display: flex; justify-content: center; min-height: 200px; }
+        
+        .button-row { display: flex; justify-content: space-between; gap: 4px; margin-top: 5px; }
+        button.note-btn { flex: 1; padding: 15px 0; font-size: 0.85rem; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 10px; }
+        .info-bar { display: flex; justify-content: flex-start; font-size: 0.85rem; color: #7f8c8d; padding: 0 5px; }
     </style>
 </head>
 <body>
@@ -96,41 +90,30 @@
 
         <div id="helpModal" class="modal">
             <div class="modal-content">
-                <span class="close-modal" onclick="toggleModal(false)">&times;</span>
-                <h2>Manual de Usuario</h2>
-                <p>Esta es una aplicación diseñada para el <strong>entrenamiento de lenguaje musical</strong> y lectura de notas.</p>
-                <hr>
-                <ul>
-                    <li><strong>Clave:</strong> Selecciona Sol, Fa o Do. Al cambiar de clave, volverás automáticamente al Nivel 1.</li>
-                    <li><strong>Dificultad:</strong> Los niveles aumentan el rango de notas (distancia desde la nota central).</li>
-                    <li><strong>Transportar:</strong> Ajusta el tono si tocas un instrumento transpositor (ej. Bombardino en Sib = +1 Tono). Por defecto es 0.</li>
-                    <li><strong>Progresión:</strong> Si logras <strong>20 aciertos seguidos</strong>, ¡subirás de nivel automáticamente!</li>
-                    <li><strong>Racha:</strong> Si fallas una nota, la racha vuelve a 0.</li>
-                </ul>
+                <span style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:20px;" onclick="toggleModal(false)">&times;</span>
+                <h3 style="margin-top:0">Guía Rápida</h3>
+                <p style="font-size:0.9rem">Selecciona una clave (𝄞 Sol, 𝄢 Fa, 𝄡 Do) y un nivel. Si consigues <strong>20 aciertos seguidos</strong> subirás de nivel automáticamente. Usa el transporte si tu instrumento no está en Do.</p>
             </div>
         </div>
 
         <div class="selector-label">Clave</div>
         <div class="horizontal-selector" id="clef-picker">
-            <button class="pill-btn active" onclick="setClef('treble', this)">Clave de Sol</button>
-            <button class="pill-btn" onclick="setClef('bass', this)">Clave de Fa</button>
-            <button class="pill-btn" onclick="setClef('alto', this)">Clave de Do</button>
+            <button class="clef-btn active" onclick="setClef('treble', this)">𝄞</button>
+            <button class="clef-btn" onclick="setClef('bass', this)">𝄢</button>
+            <button class="clef-btn" onclick="setClef('alto', this)">𝄡</button>
         </div>
 
-        <div class="selector-label">Nivel de Dificultad</div>
+        <div class="selector-label">Nivel</div>
         <div class="horizontal-selector" id="lvl-picker"></div>
 
         <div class="selector-label">Transportar</div>
         <div class="transpose-wrapper">
-            <button class="pill-btn transpose-btn" onclick="changeTranspose(-2)">-</button>
-            <div id="trans-label">0 Tonos</div>
-            <button class="pill-btn transpose-btn" onclick="changeTranspose(2)">+</button>
+            <button class="trans-control" onclick="changeTranspose(-2)">-</button>
+            <div id="trans-label" style="font-weight:bold; min-width:60px;">0 Tonos</div>
+            <button class="trans-control" onclick="changeTranspose(2)">+</button>
         </div>
 
-        <div class="info-bar">
-            <span id="score">Racha: 0</span>
-        </div>
-        
+        <div class="info-bar"><span id="score">Racha: 0</span></div>
         <div id="feedback"></div>
         <div id="canvas-container"><div id="boo"></div></div>
 
@@ -149,153 +132,69 @@
         const { Renderer, Stave, StaveNote, Voice, Formatter } = Vex.Flow;
         const noteNames = ["Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"];
         const keyToToneIndex = { "c": 0, "d": 2, "e": 4, "f": 5, "g": 7, "a": 9, "b": 11 };
-
-        const baseNotes = [
-            "c/1", "d/1", "e/1", "f/1", "g/1", "a/1", "b/1",
-            "c/2", "d/2", "e/2", "f/2", "g/2", "a/2", "b/2", 
-            "c/3", "d/3", "e/3", "f/3", "g/3", "a/3", "b/3", 
-            "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", 
-            "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5", "c/6"
-        ];
-
+        const baseNotes = ["c/1", "d/1", "e/1", "f/1", "g/1", "a/1", "b/1", "c/2", "d/2", "e/2", "f/2", "g/2", "a/2", "b/2", "c/3", "d/3", "e/3", "f/3", "g/3", "a/3", "b/3", "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5", "b/5", "c/6"];
         const clefCenters = { "treble": 25, "bass": 17, "alto": 21 };
-
-        const levelSpans = [
-            { id: 1, span: 1 }, { id: 2, span: 2 }, { id: 3, span: 3 },
-            { id: 4, span: 5 }, { id: 5, span: 7 }, { id: 6, span: 9 },
-            { id: 7, span: 11 }, { id: 8, span: 13 }, { id: 9, span: 15 },
-            { id: 10, span: 18 }
-        ];
+        const levelSpans = [{ id: 1, span: 1 }, { id: 2, span: 2 }, { id: 3, span: 3 }, { id: 4, span: 5 }, { id: 5, span: 7 }, { id: 6, span: 9 }, { id: 7, span: 11 }, { id: 8, span: 13 }, { id: 9, span: 15 }, { id: 10, span: 18 }];
 
         let currentClef = "treble", currentLevelIdx = 0, currentNoteKey = "", currentCorrectAnswer = "";
         let transposeSemiTones = 0, hits = 0, feedbackTimeout = null;
 
-        function toggleModal(show) {
-            document.getElementById('helpModal').style.display = show ? 'block' : 'none';
+        function toggleModal(s) { document.getElementById('helpModal').style.display = s ? 'block' : 'none'; }
+        function setClef(c, b) {
+            currentClef = c;
+            document.querySelectorAll('.clef-btn').forEach(el => el.classList.remove('active'));
+            b.classList.add('active');
+            setLevel(0, true);
         }
-
-        function setClef(clef, btn) {
-            currentClef = clef;
-            document.querySelectorAll('#clef-picker .pill-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            setLevel(0, true); 
+        function changeTranspose(s) {
+            let n = transposeSemiTones + s;
+            if (n >= -12 && n <= 12) { transposeSemiTones = n; updateTransposeLabel(); hits = 0; generateNote(); }
         }
-
-        function changeTranspose(semitones) {
-            let newVal = transposeSemiTones + semitones;
-            if (newVal >= -12 && newVal <= 12) {
-                transposeSemiTones = newVal;
-                updateTransposeLabel();
-                resetScore();
-                generateNote();
-            }
-        }
-
         function updateTransposeLabel() {
-            let tones = transposeSemiTones / 2;
-            let label = tones > 0 ? `+${tones}` : tones;
-            document.getElementById('trans-label').innerText = `${label} ${Math.abs(tones) === 1 ? 'Tono' : 'Tonos'}`;
+            let t = transposeSemiTones / 2;
+            document.getElementById('trans-label').innerText = `${t > 0 ? '+' : ''}${t} Tono${Math.abs(t)==1?'':'s'}`;
         }
-
-        function resetScore() {
-            hits = 0;
-            document.getElementById('score').innerText = `Racha: 0`;
-        }
-
-        function initLevels() {
-            const container = document.getElementById('lvl-picker');
-            levelSpans.forEach((lvl, index) => {
-                const btn = document.createElement('button');
-                btn.className = `pill-btn ${index === 0 ? 'active' : ''}`;
-                btn.innerText = `Lvl ${lvl.id}`;
-                btn.id = `btn-lvl-${index}`;
-                btn.onclick = () => setLevel(index, true);
-                container.appendChild(btn);
-            });
-        }
-
-        function setLevel(index, shouldResetScore = false) {
-            currentLevelIdx = index;
-            if (shouldResetScore) resetScore();
-            document.querySelectorAll('#lvl-picker .pill-btn').forEach((b, i) => b.classList.toggle('active', i === index));
-            const activeBtn = document.getElementById(`btn-lvl-${index}`);
-            if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        function setLevel(i, r) {
+            currentLevelIdx = i; if (r) hits = 0;
+            document.querySelectorAll('#lvl-picker .pill-btn').forEach((b, idx) => b.classList.toggle('active', idx === i));
+            const activeB = document.getElementById(`btn-lvl-${i}`);
+            if (activeB) activeB.scrollIntoView({ behavior: 'smooth', inline: 'center' });
             generateNote();
         }
-
         function generateNote() {
-            const div = document.getElementById("boo");
-            div.innerHTML = "";
+            const div = document.getElementById("boo"); div.innerHTML = "";
             const renderer = new Renderer(div, Renderer.Backends.SVG);
-            renderer.resize(320, 200); 
-            const context = renderer.getContext();
-            context.scale(1.2, 1.2);
-            const stave = new Stave(10, 40, 240); 
-            stave.addClef(currentClef).setContext(context).draw();
-
-            const center = clefCenters[currentClef];
-            const span = levelSpans[currentLevelIdx].span;
-            const minIdx = Math.max(0, center - span);
-            const maxIdx = Math.min(baseNotes.length - 1, center + span);
-            const availableKeys = baseNotes.slice(minIdx, maxIdx + 1);
-
-            let nextKey;
-            do { nextKey = availableKeys[Math.floor(Math.random() * availableKeys.length)]; } 
-            while (nextKey === currentNoteKey && availableKeys.length > 1);
-            
-            currentNoteKey = nextKey;
-            currentCorrectAnswer = calculateCorrectNote(currentNoteKey);
-
-            const note = new StaveNote({ clef: currentClef, keys: [currentNoteKey], duration: "q" });
-            const voice = new Voice({ num_beats: 1, beat_value: 4 });
-            voice.addTickables([note]);
-            new Formatter().joinVoices([voice]).format([voice], 150);
-            voice.draw(context, stave);
+            renderer.resize(320, 200); const ctx = renderer.getContext(); ctx.scale(1.1, 1.1);
+            const stave = new Stave(10, 40, 280); stave.addClef(currentClef).setContext(ctx).draw();
+            const center = clefCenters[currentClef]; const span = levelSpans[currentLevelIdx].span;
+            const available = baseNotes.slice(Math.max(0, center-span), Math.min(baseNotes.length-1, center+span)+1);
+            let nK; do { nK = available[Math.floor(Math.random()*available.length)]; } while (nK === currentNoteKey && available.length > 1);
+            currentNoteKey = nK;
+            let bL = nK.split('/')[0]; let bI = keyToToneIndex[bL];
+            let tI = (bI + transposeSemiTones) % 12; if (tI < 0) tI += 12;
+            currentCorrectAnswer = noteNames[tI].replace('#', '');
+            const note = new StaveNote({ clef: currentClef, keys: [nK], duration: "q" });
+            const voice = new Voice({ num_beats: 1, beat_value: 4 }).addTickables([note]);
+            new Formatter().joinVoices([voice]).format([voice], 150); voice.draw(ctx, stave);
+            document.getElementById('score').innerText = `Racha: ${hits}`;
         }
-
-        function calculateCorrectNote(vexKey) {
-            let noteLetter = vexKey.split('/')[0];
-            let baseIdx = keyToToneIndex[noteLetter];
-            let targetIdx = (baseIdx + transposeSemiTones) % 12;
-            if (targetIdx < 0) targetIdx += 12;
-            return noteNames[targetIdx].replace('#', ''); 
-        }
-
-        function checkAnswer(name) {
-            const feedbackDiv = document.getElementById("feedback");
-            clearTimeout(feedbackTimeout);
-            if (name === currentCorrectAnswer) {
+        function checkAnswer(n) {
+            const f = document.getElementById("feedback"); clearTimeout(feedbackTimeout);
+            if (n === currentCorrectAnswer) {
                 hits++;
-                document.getElementById("score").innerText = `Racha: ${hits}`;
-                if (hits >= 20 && currentLevelIdx < levelSpans.length - 1) {
-                    feedbackDiv.style.color = "var(--accent)";
-                    feedbackDiv.innerText = "¡SUBES DE NIVEL!";
-                    setLevel(currentLevelIdx + 1, false); 
-                    hits = 0; 
-                } else {
-                    feedbackDiv.style.color = "var(--success)";
-                    feedbackDiv.innerText = "¡Correcto!";
-                    generateNote();
-                }
-                feedbackDiv.style.opacity = "1";
-                feedbackTimeout = setTimeout(() => { feedbackDiv.style.opacity = "0"; }, 800);
-            } else {
-                resetScore();
-                feedbackDiv.style.color = "var(--error)";
-                feedbackDiv.innerText = `¡No! Era ${currentCorrectAnswer.toUpperCase()}`;
-                feedbackDiv.style.opacity = "1";
-            }
+                if (hits >= 20 && currentLevelIdx < levelSpans.length - 1) { f.style.color = "var(--accent)"; f.innerText = "¡NIVEL SUPERADO!"; setLevel(currentLevelIdx + 1, false); hits = 0; }
+                else { f.style.color = "var(--success)"; f.innerText = "¡Correcto!"; generateNote(); }
+            } else { hits = 0; f.style.color = "var(--error)"; f.innerText = `Error: era ${currentCorrectAnswer.toUpperCase()}`; generateNote(); }
+            f.style.opacity = "1"; feedbackTimeout = setTimeout(() => f.style.opacity = "0", 800);
         }
-
-        window.onclick = function(event) {
-            let modal = document.getElementById('helpModal');
-            if (event.target == modal) modal.style.display = "none";
+        function initLevels() {
+            const c = document.getElementById('lvl-picker');
+            levelSpans.forEach((l, i) => {
+                const b = document.createElement('button'); b.className = `pill-btn ${i===0?'active':''}`; b.innerText = `Lvl ${l.id}`; b.id = `btn-lvl-${i}`;
+                b.onclick = () => setLevel(i, true); c.appendChild(b);
+            });
         }
-
-        initLevels();
-        updateTransposeLabel();
-        setLevel(0);
+        initLevels(); updateTransposeLabel(); setLevel(0);
     </script>
 </body>
 </html>
-```
